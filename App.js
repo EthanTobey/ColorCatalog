@@ -1,13 +1,47 @@
-import React from 'react'
-import { Text, View } from "react-native"
+import React, { useState } from 'react'
+import { 
+  StyleSheet,
+  FlatList,
+ } from "react-native"
+ import ColorButton from "./components/ColorButton"
+ import ColorForm from "./components/ColorForm"
+ import { generate } from "shortid";
 
-export default function App() {
+ //a custom hook to remove the color adding function from being hard coded in the app component
+const useColors = () => {
+  const [colors, setColors] = useState([]);
+  const addColor = color => {
+    const newColor = { id: generate(), color }
+    setColors([newColor, ...colors])
+  };
+  return { colors, addColor }
+}
+
+ export default function App() {
+  const [backgroundColor, setBackgroundColor] = useState("blue");
+  const { colors, addColor } = useColors();
+
   return (
-    <View style={{ padding: 50 }}>
-      <Text>Hello World</Text>
-      <Text>Red</Text>
-      <Text>Green</Text>
-      <Text>Blue</Text>
-    </View>
+    <>
+      <ColorForm onNewColor={addColor}/>
+      <FlatList 
+        style={[styles.container, { backgroundColor }]} 
+        data={colors} 
+        renderItem={( { item }) => {
+          return (
+            <ColorButton 
+              key={item.id} 
+              backgroundColor={item.color}
+              onPress={setBackgroundColor}/>
+          )
+      }}/>
+    </>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    display: "flex",
+  }
+})
